@@ -1,0 +1,39 @@
+{
+  "name": "com.bigbro.unity.thirdpersoncontroller",
+  "version": "0.0.1",
+  "displayName": "ThirdPersonController",
+  "description": "This is a package used for the third person behavior",
+  "unity": "2018.3",
+  "documentationUrl": "README.md",
+  "changelogUrl": "https://keepachangelog.com/en/1.0.0/",
+  "dependencies": {
+    "com.unity.textmeshpro": "3.0.6",
+    "com.unity.inputsystem": "1.4.4",
+    "com.unity.cinemachine": "2.8.9"
+  },
+  "samples": [
+    {
+      "displayName": "Free look",
+      "description": "Controller with a mouse free look",
+      "path": "Samples~/SimpleFreeLookSample"
+    },
+    {
+      "displayName": "Simple Third Person",
+      "description": "Controller of the Unity template asset",
+      "path": "Samples~/UnitySimpleThirdPersonSample"
+    },
+    {
+      "displayName": "Third Person Shooter",
+      "description": "Controller with 8-way movement and facing the same direction",
+      "path": "Samples~/UnityThridPersonShooterSample"
+    }
+  ],
+  "keywords": [
+    "3D",
+    "Example"
+  ],
+  "author": {
+    "name": "BigBro",
+    "email": "Ze.Qi@outlook.com"
+  }
+}
