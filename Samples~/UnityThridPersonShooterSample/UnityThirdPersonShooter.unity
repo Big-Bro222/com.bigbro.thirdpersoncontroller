@@ -2830,7 +2830,6 @@ MonoBehaviour:
   BottomClamp: -30
   CameraAngleOverride: 0
   LockCameraPosition: 0
-  _playerInput: {fileID: 1804038349}
   _characterInput: {fileID: 11400000, guid: f4102a3f0d3ba8046b8bca43764d6feb, type: 2}
 --- !u!114 &6982812146739596224
 MonoBehaviour:

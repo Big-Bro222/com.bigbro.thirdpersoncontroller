@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 public class InputSetter : MonoBehaviour
 {
-    [SerializeField] protected CharacterInputProvider _inputProvider;
+    [SerializeField] private CharacterInputProvider _inputProvider;
     public void OnMove(InputAction.CallbackContext context)
     {
         var value = context.ReadValue<Vector2>();

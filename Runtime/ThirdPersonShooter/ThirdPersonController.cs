@@ -94,7 +94,6 @@ namespace ThirdPersonShooter
         private int _animIDMotionSpeed;
 
 #if ENABLE_INPUT_SYSTEM
-        [SerializeField]
         private PlayerInput _playerInput;
 #endif
         private Animator _animator;
@@ -126,6 +125,11 @@ namespace ThirdPersonShooter
             if (_mainCamera == null)
             {
                 _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            }
+
+            if (!_playerInput)
+            {
+                _playerInput = FindObjectOfType<PlayerInput>();
             }
 
             if (GetComponent<ITickProvider>() == null)

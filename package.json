@@ -1,6 +1,6 @@
 {
   "name": "com.bigbro.unity.thirdpersoncontroller",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "displayName": "ThirdPersonController",
   "description": "This is a package used for the third person behavior",
   "unity": "2018.3",
