@@ -9,10 +9,6 @@ using UnityEngine.InputSystem;
 
 namespace ThirdPersonShooter
 {
-    [RequireComponent(typeof(CharacterController))]
-#if ENABLE_INPUT_SYSTEM
-    [RequireComponent(typeof(PlayerInput))]
-#endif
     public class ThirdPersonController : MonoBehaviour
     {
         [Header("Player")] [Tooltip("Move speed of the character in m/s")]
@@ -98,11 +94,13 @@ namespace ThirdPersonShooter
         private int _animIDMotionSpeed;
 
 #if ENABLE_INPUT_SYSTEM
+        [SerializeField]
         private PlayerInput _playerInput;
 #endif
         private Animator _animator;
         private CharacterController _controller;
-        private StarterAssetsInputs _input;
+        [SerializeField]
+        private CharacterInputProvider _characterInput;
         private GameObject _mainCamera;
 
         private const float _threshold = 0.01f;
@@ -129,6 +127,13 @@ namespace ThirdPersonShooter
             {
                 _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             }
+
+            if (GetComponent<ITickProvider>() == null)
+            {
+                gameObject.AddComponent<MonoTickProvider>();
+            }
+            ITickProvider tickProvider = GetComponent<ITickProvider>();
+            tickProvider.OnTick += Tick;
         }
 
         private void Start()
@@ -137,12 +142,6 @@ namespace ThirdPersonShooter
 
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
-            _input = GetComponent<StarterAssetsInputs>();
-#if ENABLE_INPUT_SYSTEM
-            _playerInput = GetComponent<PlayerInput>();
-#else
-			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
-#endif
 
             AssignAnimationIDs();
 
@@ -151,7 +150,7 @@ namespace ThirdPersonShooter
             _fallTimeoutDelta = FallTimeout;
         }
 
-        private void Update()
+        private void Tick()
         {
             _hasAnimator = TryGetComponent(out _animator);
             JumpAndGravity();
@@ -193,13 +192,13 @@ namespace ThirdPersonShooter
         private void CameraRotation()
         {
             // if there is an input and camera position is not fixed
-            if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
+            if (_characterInput.look.sqrMagnitude >= _threshold && !LockCameraPosition)
             {
                 //Don't multiply mouse input by Time.deltaTime;
                 float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
 
-                _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
-                _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
+                _cinemachineTargetYaw += _characterInput.look.x * deltaTimeMultiplier;
+                _cinemachineTargetPitch += _characterInput.look.y * deltaTimeMultiplier;
             }
 
             // clamp our rotations so our values are limited 360 degrees
@@ -214,19 +213,19 @@ namespace ThirdPersonShooter
         private void Move()
         {
             // set target speed based on move speed, sprint speed and if sprint is pressed
-            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            float targetSpeed = _characterInput.sprint ? SprintSpeed : MoveSpeed;
 
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
             // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is no input, set the target speed to 0
-            if (_input.move == Vector2.zero) targetSpeed = 0.0f;
+            if (_characterInput.move == Vector2.zero) targetSpeed = 0.0f;
 
             // a reference to the players current horizontal velocity
             float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
             float speedOffset = 0.1f;
-            float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+            float inputMagnitude = _characterInput.analogMovement ? _characterInput.move.magnitude : 1f;
 
             // accelerate or decelerate to target speed
             if (currentHorizontalSpeed < targetSpeed - speedOffset ||
@@ -249,7 +248,7 @@ namespace ThirdPersonShooter
             // if (_animationBlend < 0.01f) _animationBlend = 0f;
 
             // normalise input direction
-            Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+            Vector3 inputDirection = new Vector3(_characterInput.move.x, 0.0f, _characterInput.move.y).normalized;
             
 
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
@@ -265,7 +264,7 @@ namespace ThirdPersonShooter
             transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
 
 
-            Vector3 targetDirection = transform.TransformDirection(new Vector3(_input.move.x,0,_input.move.y));
+            Vector3 targetDirection = transform.TransformDirection(new Vector3(_characterInput.move.x,0,_characterInput.move.y));
 
             // move the player
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
@@ -276,7 +275,7 @@ namespace ThirdPersonShooter
             //TODO:Change the style of animation
             if (_hasAnimator)
             {
-                if (_input.sprint)
+                if (_characterInput.sprint)
                 {
                     _animator.SetBool(_animIDIsRunning,true);
                 }
@@ -312,7 +311,7 @@ namespace ThirdPersonShooter
                 }
 
                 // Jump
-                if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+                if (_characterInput.jump && _jumpTimeoutDelta <= 0.0f)
                 {
                     // the square root of H * -2 * G = how much velocity needed to reach desired height
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
@@ -350,7 +349,7 @@ namespace ThirdPersonShooter
                 }
 
                 // if we are not grounded, do not jump
-                _input.jump = false;
+                _characterInput.jump = false;
             }
 
             // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
